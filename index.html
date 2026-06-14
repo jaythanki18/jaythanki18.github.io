@@ -1,10 +1,955 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>HabitSetu</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HabitSetu – Daily Habit Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #07090F;
+    --bg2: #0D1422;
+    --card: #111827;
+    --card2: #162034;
+    --blue: #2563EB;
+    --cyan: #06B6D4;
+    --cyan2: #22D3EE;
+    --text: #E2E8F0;
+    --muted: #64748B;
+    --muted2: #94A3B8;
+    --border: rgba(255,255,255,0.07);
+    --glow: rgba(6,182,212,0.25);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav.site-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 5%;
+    background: rgba(7,9,15,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-logo img { width: 36px; height: 36px; border-radius: 9px; }
+  .nav-logo span {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700; font-size: 1.1rem;
+    background: linear-gradient(135deg, #fff 0%, var(--cyan2) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { text-decoration: none; color: var(--muted2); font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
+    color: #fff; text-decoration: none;
+    padding: 10px 22px; border-radius: 50px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600; font-size: 0.9rem;
+    transition: opacity 0.2s, transform 0.2s;
+    box-shadow: 0 0 20px rgba(6,182,212,0.3);
+    border: none; cursor: pointer;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh; display: flex; align-items: center;
+    padding: 120px 5% 80px; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -200px; left: -100px;
+    width: 700px; height: 700px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: ''; position: absolute; top: 0; right: -100px;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1200px; margin: 0 auto; width: 100%;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.25);
+    border-radius: 50px; padding: 6px 14px;
+    font-size: 0.78rem; font-weight: 600; color: var(--cyan2);
+    letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 24px;
+  }
+  .eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan2); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.8); } }
+  .hero-headline {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 800;
+    line-height: 1.1; margin-bottom: 20px;
+  }
+  .headline-gradient {
+    background: linear-gradient(135deg, var(--cyan2) 0%, var(--blue) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero-sub { font-size: 1.05rem; color: var(--muted2); line-height: 1.7; margin-bottom: 36px; max-width: 460px; }
+  .hero-ctas { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); color: var(--muted2); text-decoration: none;
+    padding: 10px 22px; border-radius: 50px; font-size: 0.9rem; font-weight: 500;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--cyan); color: var(--text); }
+  .hero-trust { margin-top: 40px; display: flex; gap: 24px; flex-wrap: wrap; }
+  .trust-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--muted); }
+
+  /* ── PHONES ── */
+  .hero-phones {
+    position: relative; display: flex; justify-content: center;
+    align-items: flex-end; height: 560px;
+  }
+  .phone-frame {
+    position: relative; border-radius: 40px; overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.12);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 40px rgba(6,182,212,0.15);
+  }
+  .phone-frame img { display: block; width: 100%; border-radius: inherit; }
+  .phone-main { width: 220px; z-index: 2; animation: floatMain 4s ease-in-out infinite; }
+  .phone-back {
+    width: 190px; position: absolute; right: -30px; bottom: 30px; z-index: 1;
+    opacity: 0.75; border-color: rgba(255,255,255,0.07);
+    animation: floatBack 4s ease-in-out infinite 0.8s;
+  }
+  @keyframes floatMain { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-12px); } }
+  @keyframes floatBack { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
+
+  .progress-badge {
+    position: absolute; top: 30px; left: -20px; z-index: 3;
+    background: var(--card2); border: 1px solid var(--border); border-radius: 20px;
+    padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px var(--glow);
+    animation: floatBadge 4s ease-in-out infinite 1.2s;
+  }
+  @keyframes floatBadge { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
+  .ring-svg { width: 44px; height: 44px; transform: rotate(-90deg); }
+  .ring-track { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 4; }
+  .ring-progress {
+    fill: none; stroke: url(#ringGrad); stroke-width: 4; stroke-linecap: round;
+    stroke-dasharray: 113; stroke-dashoffset: 113;
+    animation: ringFill 2s ease-out 0.5s forwards;
+  }
+  @keyframes ringFill { to { stroke-dashoffset: 38; } }
+  .badge-text { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .badge-pct { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+  .badge-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .streak-badge {
+    position: absolute; bottom: 60px; left: -40px; z-index: 3;
+    background: var(--card2); border: 1px solid var(--border); border-radius: 16px;
+    padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.4);
+    animation: floatBadge 4s ease-in-out infinite 0.4s;
+  }
+  .streak-text { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .streak-num { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .streak-label { font-size: 0.65rem; color: var(--muted); }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    padding: 40px 5%; background: var(--bg2);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .stats-inner {
+    max-width: 900px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+  }
+  .stat-item { text-align: center; padding: 0 20px; border-right: 1px solid var(--border); }
+  .stat-item:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--cyan2) 0%, var(--blue) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .stat-desc { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+
+  /* ── SECTIONS ── */
+  .section { padding: 100px 5%; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-eyebrow {
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--cyan); margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 800;
+    line-height: 1.2; margin-bottom: 16px;
+  }
+  .section-sub { font-size: 1rem; color: var(--muted2); max-width: 500px; line-height: 1.7; }
+  .section-head { margin-bottom: 60px; }
+
+  /* ── FEATURES ── */
+  .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .feature-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px;
+    transition: border-color 0.25s, transform 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .feature-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .feature-card:hover { border-color: rgba(6,182,212,0.3); transform: translateY(-3px); }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; margin-bottom: 20px;
+    background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(6,182,212,0.15));
+    border: 1px solid rgba(6,182,212,0.2);
+  }
+  .feature-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+  .feature-desc { font-size: 0.9rem; color: var(--muted2); line-height: 1.65; }
+
+  /* ── SCREENSHOTS ── */
+  .screenshots-section { background: var(--bg2); }
+  .screens-layout {
+    display: flex; gap: 30px; align-items: flex-end; justify-content: center;
+    padding-bottom: 20px; overflow-x: auto;
+  }
+  .screen-item { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+  .screen-frame {
+    border-radius: 32px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5); transition: transform 0.3s;
+  }
+  .screen-frame:hover { transform: translateY(-8px); }
+  .screen-main .screen-frame img { width: 200px; display: block; }
+  .screen-side .screen-frame img { width: 170px; display: block; }
+  .screen-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.82rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* ── PRIVACY SECTION ── */
+  .privacy-section {
+    background: linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(6,182,212,0.04) 100%);
+    border: 1px solid rgba(6,182,212,0.15); border-radius: 28px; padding: 60px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+  }
+  .privacy-badges { display: flex; flex-direction: column; gap: 16px; }
+  .priv-badge {
+    display: flex; align-items: flex-start; gap: 16px; padding: 18px 20px;
+    background: rgba(255,255,255,0.03); border-radius: 14px; border: 1px solid var(--border);
+  }
+  .priv-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+  .priv-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
+  .priv-desc { font-size: 0.83rem; color: var(--muted2); line-height: 1.5; }
+
+  /* ── CTA ── */
+  .cta-section {
+    text-align: center; padding: 120px 5%; position: relative; overflow: hidden;
+  }
+  .cta-section::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 800px 400px at 50% 100%, rgba(6,182,212,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-inner { position: relative; max-width: 600px; margin: 0 auto; }
+  .cta-icon { width: 80px; height: 80px; border-radius: 22px; margin: 0 auto 28px; box-shadow: 0 0 40px rgba(6,182,212,0.4); }
+  .cta-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; line-height: 1.15; margin-bottom: 18px;
+  }
+  .cta-sub { font-size: 1rem; color: var(--muted2); margin-bottom: 40px; }
+  .cta-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 40px 5%; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  }
+  .footer-brand { display: flex; align-items: center; gap: 10px; }
+  .footer-brand img { width: 28px; height: 28px; border-radius: 7px; }
+  .footer-brand span { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--muted2); }
+  .footer-copy { font-size: 0.8rem; color: var(--muted); }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-links a { font-size: 0.8rem; color: var(--muted); text-decoration: none; cursor: pointer; }
+  .footer-links a:hover { color: var(--text); }
+
+  /* ── PRIVACY MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+    overflow-y: auto; padding: 40px 20px;
+  }
+  .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+  .modal-box {
+    background: #0D1422; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; width: 100%; max-width: 780px;
+    padding: 48px; position: relative; margin: auto;
+  }
+  .modal-close {
+    position: absolute; top: 20px; right: 20px;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+    border-radius: 50%; width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--muted2); font-size: 1rem;
+    transition: background 0.2s; line-height: 1;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+
+  /* ── POLICY CONTENT STYLES ── */
+  .policy-header { margin-bottom: 36px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+  .policy-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.2);
+    border-radius: 4px; padding: 4px 12px;
+    font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--cyan2); margin-bottom: 16px;
+  }
+  .policy-header h1 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(1.6rem, 4vw, 2rem); font-weight: 800; margin-bottom: 14px;
+  }
+  .policy-meta { display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); }
+
+  .policy-toc {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px; margin-bottom: 36px;
+  }
+  .policy-toc-title {
+    font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--cyan); font-weight: 700; margin-bottom: 12px;
+  }
+  .policy-toc ol { list-style: none; counter-reset: toc; display: grid; grid-template-columns: 1fr 1fr; gap: 5px 24px; }
+  .policy-toc li { counter-increment: toc; font-size: 0.82rem; }
+  .policy-toc li::before { content: counter(toc, decimal-leading-zero) ". "; color: var(--muted); font-size: 0.7rem; }
+  .policy-toc a { color: var(--muted2); text-decoration: none; }
+  .policy-toc a:hover { color: var(--cyan2); }
+
+  .policy-section { margin-bottom: 44px; padding-bottom: 44px; border-bottom: 1px solid var(--border); }
+  .policy-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .policy-sec-num { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cyan); display: block; margin-bottom: 8px; }
+  .policy-section h2 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 18px;
+  }
+  .policy-section p { font-size: 0.88rem; color: var(--muted2); margin-bottom: 12px; line-height: 1.7; }
+  .policy-section p:last-child { margin-bottom: 0; }
+
+  .policy-card {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 20px; margin: 14px 0;
+  }
+  .policy-card-label {
+    font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--cyan2); font-weight: 700; margin-bottom: 10px; display: block;
+  }
+  .policy-card p { font-size: 0.83rem; color: var(--muted2); }
+
+  .policy-highlight {
+    background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2);
+    border-left: 3px solid var(--cyan); border-radius: 6px;
+    padding: 14px 18px; margin: 14px 0; font-size: 0.83rem; color: var(--muted2); line-height: 1.6;
+  }
+  .policy-highlight strong { color: var(--text); }
+
+  .policy-list { list-style: none; margin: 10px 0; }
+  .policy-list li {
+    padding: 7px 0 7px 16px; position: relative;
+    font-size: 0.83rem; color: var(--muted2);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .policy-list li:last-child { border-bottom: none; }
+  .policy-list li::before { content: '–'; position: absolute; left: 0; color: var(--cyan); }
+
+  .policy-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.8rem; }
+  .policy-table th {
+    text-align: left; padding: 8px 12px; font-size: 0.68rem;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid rgba(6,182,212,0.3); font-weight: 600;
+  }
+  .policy-table td {
+    padding: 10px 12px; border-bottom: 1px solid var(--border);
+    color: var(--muted2); vertical-align: top; font-size: 0.8rem;
+  }
+  .policy-table tr:last-child td { border-bottom: none; }
+  .policy-table td:first-child { font-family: monospace; color: var(--cyan2); font-weight: 600; white-space: nowrap; }
+
+  .policy-a { color: var(--cyan2); text-decoration: none; }
+  .policy-a:hover { text-decoration: underline; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 60px; }
+    .hero-sub { max-width: 100%; }
+    .hero-ctas, .hero-trust { justify-content: center; }
+    .hero-phones { height: 420px; }
+    .phone-main { width: 180px; }
+    .phone-back { width: 150px; right: -20px; }
+    .progress-badge { left: -10px; }
+    .streak-badge { left: -20px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .stats-inner { grid-template-columns: repeat(3, 1fr); }
+    .privacy-section { grid-template-columns: 1fr; padding: 40px; }
+    nav .nav-links { display: none; }
+    .policy-toc ol { grid-template-columns: 1fr; }
+    .modal-box { padding: 32px 24px; }
+  }
+  @media (max-width: 600px) {
+    .hero { padding: 100px 5% 60px; }
+    .section { padding: 70px 5%; }
+    .hero-phones { height: 360px; }
+    .phone-main { width: 155px; }
+    .phone-back { width: 130px; }
+    .stats-inner { grid-template-columns: 1fr; }
+    .stat-item { border-right: none; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .stat-item:last-child { border-bottom: none; }
+  }
+</style>
 </head>
 <body>
-  <h1>HabitSetu</h1>
-  <p>Bridge your habits with daily goals.</p>
+
+<!-- PRIVACY MODAL -->
+<div class="modal-overlay" id="privacyModal" onclick="if(event.target===this)closePrivacy()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closePrivacy()" aria-label="Close">✕</button>
+
+    <div class="policy-header">
+      <div class="policy-badge">HabitSetu App</div>
+      <h1>Privacy Policy</h1>
+      <div class="policy-meta">
+        <span>📅 Effective Date: 11 March 2026</span>
+        <span>🔄 Last Updated: 11 March 2026</span>
+        <span>📍 Version 1.0</span>
+      </div>
+    </div>
+
+    <div class="policy-toc">
+      <div class="policy-toc-title">Table of Contents</div>
+      <ol>
+        <li><a href="#p-overview" onclick="scrollPolicy('p-overview')">Overview</a></li>
+        <li><a href="#p-data" onclick="scrollPolicy('p-data')">Data We Collect</a></li>
+        <li><a href="#p-permissions" onclick="scrollPolicy('p-permissions')">App Permissions</a></li>
+        <li><a href="#p-advertising" onclick="scrollPolicy('p-advertising')">Advertising (AdMob)</a></li>
+        <li><a href="#p-sharing" onclick="scrollPolicy('p-sharing')">Data Sharing</a></li>
+        <li><a href="#p-storage" onclick="scrollPolicy('p-storage')">Data Storage & Security</a></li>
+        <li><a href="#p-gdpr" onclick="scrollPolicy('p-gdpr')">GDPR & EU Users</a></li>
+        <li><a href="#p-children" onclick="scrollPolicy('p-children')">Children's Privacy</a></li>
+        <li><a href="#p-rights" onclick="scrollPolicy('p-rights')">Your Rights</a></li>
+        <li><a href="#p-contact" onclick="scrollPolicy('p-contact')">Contact Us</a></li>
+      </ol>
+    </div>
+
+    <div class="policy-section" id="p-overview">
+      <span class="policy-sec-num">01 - Overview</span>
+      <h2>Our Commitment to Your Privacy</h2>
+      <p>This Privacy Policy describes how HabitSetu ("we," "our," or "the app") handles information when you use our Android application. We are committed to being transparent about our data practices.</p>
+      <p>This app does not require account registration or login. We do not collect your name, email address, phone number, or any personally identifiable information as part of normal app usage.</p>
+      <div class="policy-highlight"><strong>Data Usage Clarification:</strong> We do not sell your personal data to any third parties. We do not use your data to track you across apps or services outside of this app. The only external data sharing occurs through Google AdMob (for displaying ads) and when you voluntarily contact our support team.</div>
+      <div class="policy-highlight"><strong>Plain language summary:</strong> Your habit data and activity logs stay on your device. Logs older than 7 days are automatically deleted to keep the app lean. EEA/UK/Swiss users are shown a consent dialog on first launch and can customise or decline individual data processing purposes via the "Manage options" screen. Some ad partners may process data under legitimate interest by default, which you can object to via "Manage options."</div>
+    </div>
+
+    <div class="policy-section" id="p-data">
+      <span class="policy-sec-num">02 - Data We Collect</span>
+      <h2>Information Collection &amp; Use</h2>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Habit Data (Local Only)</span>
+        <p>All habit information you create, edit, or delete - including habit names, schedules, and completion history - is stored exclusively in a local database on your device using Room Database. This data never leaves your device under normal app operation and is never transmitted to our servers.</p>
+      </div>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Activity Logs (Local Only - Auto-Pruned)</span>
+        <p>The app maintains a local activity logs table within the Room Database to record in-app events and user interactions (such as habit completions, edits, and reminders triggered). This data is used solely to support app functionality and is never transmitted off your device.</p>
+        <p>To keep the app's storage footprint small, a background task (Android WorkManager) runs automatically once per day to permanently delete any log entries older than 7 days. No manual action is required.</p>
+        <ul class="policy-list">
+          <li>Logs are stored only in your device's local Room Database</li>
+          <li>Log entries are automatically purged after 7 days</li>
+          <li>Logs are never synced, uploaded, or shared with us or any third party</li>
+          <li>Pruning is performed by a periodic WorkManager task running approximately every 24 hours</li>
+        </ul>
+      </div>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Device Information (Support Only - Voluntary)</span>
+        <p>When you tap "Contact Us," your device's email app opens with the following information pre-populated in the email body to help us diagnose issues:</p>
+        <ul class="policy-list">
+          <li>App Version</li>
+          <li>Build Number</li>
+          <li>Device Model</li>
+          <li>Manufacturer</li>
+          <li>Android OS Version</li>
+          <li>Android SDK Version</li>
+          <li>Timestamp of the support request</li>
+          <li>A zip file of your local habit database - attached to the email</li>
+        </ul>
+        <p>This information is pre-filled for your convenience but is only sent if you actively tap Send in your email app. It is used solely for debugging and improving app functionality and is never shared with any third party.</p>
+        <div class="policy-highlight"><strong>How "Contact Us" works:</strong> Tapping "Contact Us" triggers an Android email intent that opens your installed email app. The device and app details above are pre-filled as plain text in the email body, and your habit database is included as a .zip file attachment. The app does not transmit any data automatically or in the background. Nothing is sent unless you actively tap Send in your email app.</div>
+      </div>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Advertising Data (via Google AdMob)</span>
+        <p>Our app displays advertisements through Google AdMob. AdMob may automatically collect certain data to serve relevant ads. See Section 4 for full details.</p>
+      </div>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Data Deletion Request</span>
+        <p>If you wish to delete your data, you can contact us at <a class="policy-a" href="mailto:habitsetu@gmail.com">habitsetu@gmail.com</a>.</p>
+        <p>We do not store personal data on our own servers. However, the app may collect limited data through third-party services such as Google AdMob, including device identifiers, approximate location, and app interaction data for advertising purposes.</p>
+        <p>Upon receiving a request, we will take reasonable steps to delete any user-related data we may have access to, including coordinating with third-party services such as Google AdMob where applicable.</p>
+        <p>Please note that some data may be retained for a limited period as required for legal or operational purposes.</p>
+      </div>
+    </div>
+
+    <div class="policy-section" id="p-permissions">
+      <span class="policy-sec-num">03 - App Permissions</span>
+      <h2>Device Permissions Explained</h2>
+      <p>Our app requests the following Android permissions. Each permission is used only for the specific purpose described below:</p>
+      <table class="policy-table">
+        <thead><tr><th>Permission</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>POST_NOTIFICATIONS</td><td>To send you habit reminders and alarm notifications at your scheduled times.</td></tr>
+          <tr><td>SCHEDULE_EXACT_ALARM</td><td>To schedule precise habit reminders at the exact times you define.</td></tr>
+          <tr><td>RECEIVE_BOOT_COMPLETED</td><td>To automatically restore your scheduled habit alarms after your device is restarted.</td></tr>
+          <tr><td>INTERNET</td><td>To load and display advertisements via Google AdMob and to open external web pages such as this Privacy Policy within the app.</td></tr>
+        </tbody>
+      </table>
+      <div class="policy-highlight"><strong>No Location Permissions:</strong> This app does not request ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION. We never access GPS or network-based precise location data. Approximate location used by AdMob is derived solely from your device's IP address by Google's servers - the app itself does not read or transmit your location.</div>
+      <p>No permissions are used to collect, track, or transmit personal information beyond the stated purposes above.</p>
+    </div>
+
+    <div class="policy-section" id="p-advertising">
+      <span class="policy-sec-num">04 - Advertising</span>
+      <h2>Google AdMob &amp; Advertisements</h2>
+      <p>Our app displays advertisements using Google AdMob, a mobile advertising platform provided by Google LLC. AdMob uses the Google Mobile Ads SDK to load and display advertisements inside the app.</p>
+      <p>When ads are shown, certain data may be automatically collected and processed by Google and its advertising partners participating in the IAB Europe Transparency &amp; Consent Framework (TCF) in order to serve ads, measure advertising performance, and prevent fraud.</p>
+      <p>Advertisements are only requested after obtaining the required user consent in applicable regions.</p>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Data AdMob &amp; Ad Partners May Collect</span>
+        <ul class="policy-list">
+          <li>Advertising ID (Google Advertising Identifier / GAID)</li>
+          <li>Device identifiers and hardware information</li>
+          <li>IP address (used to derive approximate location)</li>
+          <li>Approximate location derived from IP address</li>
+          <li>Cookies and information stored on or accessed from your device</li>
+          <li>App usage and interaction data</li>
+          <li>Diagnostic information and crash signals</li>
+        </ul>
+      </div>
+
+      <div class="policy-highlight"><strong>Precise location is never collected.</strong> This app does not request any location permission (ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION). GPS or network-based precise location data is therefore never available to AdMob or any other SDK through this app.</div>
+
+      <p>Google AdMob acts as an independent data controller for advertising data. Their data practices are governed by their own privacy policies, and we encourage you to review them.</p>
+      <p><strong>Google Privacy Policy:</strong> <a class="policy-a" href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">https://policies.google.com/privacy</a></p>
+      <p><strong>How Google uses data from apps that use its services:</strong> <a class="policy-a" href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">https://policies.google.com/technologies/partner-sites</a></p>
+
+      <div class="policy-card">
+        <span class="policy-card-label">EU / EEA Users - Consent Dialog (IAB TCF)</span>
+        <p>If you are located in the European Economic Area (EEA), United Kingdom, or Switzerland, you will be shown a consent dialog when you first launch the app in order to comply with the General Data Protection Regulation (GDPR) and Google's EU User Consent Policy.</p>
+        <p>The consent dialog asks for permission for the following purposes:</p>
+        <ul class="policy-list">
+          <li>Personalised advertising and content</li>
+          <li>Advertising and content measurement</li>
+          <li>Audience research and service improvement</li>
+          <li>Storing and/or accessing information on your device</li>
+        </ul>
+        <p>Users may choose to consent to all purposes or use the "Manage options" screen to customise or decline individual processing purposes and vendors.</p>
+        <p>You can revisit and modify your consent choices at any time through the privacy settings available within the app.</p>
+      </div>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Legitimate Interest Processing</span>
+        <p>Some advertising partners may rely on legitimate interest as a legal basis under GDPR to process certain data for purposes such as fraud prevention, ad delivery, or measurement.</p>
+        <p>Where applicable, legitimate interest processing may be enabled by default in the consent message. You can review and object to such processing through the "Manage options" screen within the consent dialog.</p>
+      </div>
+
+      <div class="policy-card">
+        <span class="policy-card-label">RTB (Real-Time Bidding) Partner Creatives</span>
+        <p>Our AdMob configuration includes a consent verification check for Real-Time Bidding (RTB) partners, including Authorised Buyers and Open Bidding partners. Google will automatically block ad creatives from partners that do not have valid user consent before displaying them in the app.</p>
+      </div>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Opt-Out of Personalised Ads</span>
+        <ul class="policy-list">
+          <li>Android: Settings -> Google -> Ads -> "Delete advertising ID" or "Opt out of Ads Personalisation"</li>
+          <li>Visit <a class="policy-a" href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">adssettings.google.com</a> to manage Google ad personalisation</li>
+        </ul>
+      </div>
+
+      <div class="policy-highlight"><strong>Tracking Disclosure:</strong> While this app itself does not track users across apps, Google AdMob and its partners may use data for personalised advertising depending on your consent preferences.</div>
+      <div class="policy-highlight"><strong>Non-Personalised Ads:</strong> If you choose not to consent to personalised advertising, you may still see ads. These will be non-personalised and based on contextual information rather than your personal data.</div>
+    </div>
+
+    <div class="policy-section" id="p-sharing">
+      <span class="policy-sec-num">05 - Data Sharing</span>
+      <h2>How We Share Information</h2>
+      <p>We do not sell, trade, rent, or otherwise transfer your personal information to third parties. The limited data sharing that occurs is as follows:</p>
+
+      <table class="policy-table">
+        <thead><tr><th>Recipient</th><th>Data Shared</th><th>Condition</th></tr></thead>
+        <tbody>
+          <tr><td>Google AdMob</td><td>Advertising ID (GAID), device identifiers, app interaction data, diagnostic signals, approximate location derived from IP address</td><td>Automatically during ad display</td></tr>
+          <tr><td>AdMob Advertising Partners (IAB TCF)</td><td>Device and ad identifiers, usage signals (via AdMob network)</td><td>Automatically during ad display; some partners operate under legitimate interest</td></tr>
+          <tr><td>Support Team (Developer)</td><td>App version, build number, device model, manufacturer, Android OS version, SDK version, timestamp (email body) + habit database zip file (email attachment)</td><td>Only when you explicitly tap "Contact Us" and actively tap Send in your email app</td></tr>
+          <tr><td>Any other party</td><td>None</td><td>Never</td></tr>
+        </tbody>
+      </table>
+
+      <p>We do not operate any external servers or cloud infrastructure. No habit data or activity logs are ever transmitted to us automatically.</p>
+      <div class="policy-highlight"><strong>No Sale of Data:</strong> We do not sell your personal data to any third parties under any circumstances.</div>
+    </div>
+
+    <div class="policy-section" id="p-storage">
+      <span class="policy-sec-num">06 - Data Storage &amp; Security</span>
+      <h2>How Your Data Is Stored</h2>
+      <p>All app data - including your habits, schedules, preferences, and activity logs - is stored locally on your device using Android's Room Database (SQLite). This means:</p>
+      <ul class="policy-list">
+        <li>Your data exists only on your physical device</li>
+        <li>We do not operate any servers, databases, or cloud storage</li>
+        <li>Your data is protected by your device's built-in security (PIN, biometrics, encryption)</li>
+        <li>Uninstalling the app permanently deletes all associated data from your device</li>
+      </ul>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Automatic Log Pruning via WorkManager</span>
+        <p>To keep the app's storage usage minimal, we use Android WorkManager to run a periodic background task approximately every 24 hours. This task automatically deletes activity log entries that are older than 7 days from the local Room Database.</p>
+        <p>This process runs entirely on-device, requires no network access, and involves no transmission of data. It is purely a housekeeping operation to prevent the logs table from growing indefinitely.</p>
+        <ul class="policy-list">
+          <li>Pruning runs automatically - no action required from you</li>
+          <li>Only log entries older than 7 days are deleted</li>
+          <li>Habit data, schedules, and completion history are never affected by this task</li>
+          <li>The task is registered when the app starts and persists across device reboots</li>
+        </ul>
+      </div>
+
+      <div class="policy-highlight"><strong>Note:</strong> Because all data is stored locally, we cannot recover your data if your device is lost, reset, or if you uninstall the app. We recommend backing up your device regularly.</div>
+    </div>
+
+    <div class="policy-section" id="p-gdpr">
+      <span class="policy-sec-num">07 - GDPR &amp; EU Users</span>
+      <h2>European Privacy Rights</h2>
+      <p>If you are a resident of the European Economic Area (EEA), United Kingdom, or Switzerland, you have specific rights under the General Data Protection Regulation (GDPR) and equivalent local laws.</p>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Your GDPR Rights</span>
+        <ul class="policy-list">
+          <li><strong>Right of Access</strong> - Since we do not store personal data on our servers, we do not hold any user data that can be accessed or exported by us. Advertising-related data is processed by Google AdMob.</li>
+          <li><strong>Right to Erasure</strong> - You may delete all app data at any time by clearing app data or uninstalling the app.</li>
+          <li><strong>Right to Withdraw Consent</strong> - You may withdraw advertising consent at any time via the "Manage options" screen in the consent dialog or via your device settings.</li>
+          <li><strong>Right to Object</strong> - You may object to processing based on legitimate interest for each ad partner individually via the "Manage options" screen.</li>
+        </ul>
+      </div>
+
+      <p>Since we do not store personal data on our servers, most of these rights can be exercised directly on your device by clearing app data or uninstalling the application. For advertising-related rights, refer to Google's privacy controls or use the in-app consent management screen.</p>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Legal Bases for Processing (EEA / UK / Switzerland)</span>
+        <ul class="policy-list">
+          <li><strong>Consent</strong> - Personalised advertising and content measurement require your explicit consent, given through the in-app IAB TCF consent dialog on first launch.</li>
+          <li><strong>Legitimate Interest</strong> - Some ad partners may process data under legitimate interest. You can review and object to such processing via the "Manage options" screen.</li>
+        </ul>
+      </div>
+
+      <div class="policy-highlight"><strong>Note on location:</strong> This app does not collect or transmit precise location data - no location permission is requested. Approximate location (IP-derived) is processed by Google AdMob under the legal bases above.</div>
+    </div>
+
+    <div class="policy-section" id="p-children">
+      <span class="policy-sec-num">08 - Children's Privacy</span>
+      <h2>Children Under 13</h2>
+      <p>Our app is not directed to children under the age of 13, and we do not knowingly collect personal information from children under 13 years of age.</p>
+      <p>If you are a parent or guardian and believe your child has used our app or provided personal information, please contact us immediately at the address below and we will take appropriate steps to address the situation.</p>
+      <p>Our advertising implementation does not use child-directed ad settings as this app is intended for general audiences aged 13 and above. We do not knowingly request or serve personalised ads to users identified as children.</p>
+    </div>
+
+    <div class="policy-section" id="p-rights">
+      <span class="policy-sec-num">09 - Your Rights</span>
+      <h2>Managing &amp; Deleting Your Data</h2>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Delete All App Data</span>
+        <p>You can delete all data associated with this app - including habits, schedules, and activity logs - at any time using either of these methods:</p>
+        <ul class="policy-list">
+          <li>Uninstall the app - Permanently removes all local data from your device</li>
+          <li>Clear app data - Settings -> Apps -> HabitSetu -> Storage -> Clear Data</li>
+        </ul>
+      </div>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Manage Ad Preferences</span>
+        <ul class="policy-list">
+          <li>Android: Settings -> Google -> Ads -> Delete Advertising ID</li>
+          <li>Visit <a class="policy-a" href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">adssettings.google.com</a> to manage Google ad personalisation</li>
+        </ul>
+      </div>
+
+      <p>Since no account or login exists in this app, there is no account deletion process required.</p>
+    </div>
+
+    <div class="policy-section" id="p-contact">
+      <span class="policy-sec-num">10 - Contact</span>
+      <h2>Contact Us</h2>
+      <p>If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:</p>
+
+      <div class="policy-card">
+        <span class="policy-card-label">Developer Contact</span>
+        <ul class="policy-list">
+          <li><strong>Email:</strong> <a class="policy-a" href="mailto:jaythanki.ce@gmail.com">jaythanki.ce@gmail.com</a></li>
+          <li><strong>App Name:</strong> HabitSetu</li>
+          <li><strong>Developer Name:</strong> Jaykumar Jitesh Thanki</li>
+          <li><strong>Country:</strong> India</li>
+        </ul>
+      </div>
+
+      <p>We will respond to all legitimate privacy inquiries within 30 days.</p>
+      <div class="policy-highlight"><strong>Policy Updates:</strong> We may update this Privacy Policy from time to time. Any changes will be reflected by updating the "Last Updated" date at the top of this page. Continued use of the app after changes constitutes acceptance of the updated policy.</div>
+      <p><strong>HabitSetu</strong><br>© 2026 HabitSetu. All rights reserved.<br>Privacy Policy · Version 1.0 · Effective 11 March 2026</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="site-nav">
+  <a class="nav-logo" href="#">
+    <img src="./assets/playstore.png" alt="HabitSetu icon">
+    <span>HabitSetu</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#screenshots">Screenshots</a></li>
+    <li><a href="#privacy">Privacy</a></li>
+  </ul>
+  <a class="btn-primary" href="#download">⬇ Download Free</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        Available on Android · Free
+      </div>
+      <h1 class="hero-headline">
+        Build habits that<br>
+        <span class="headline-gradient">actually stick.</span>
+      </h1>
+      <p class="hero-sub">
+        HabitSetu is your minimalist daily habit tracker — streak‑powered, reminder‑smart, and completely offline. No accounts. No clutter. Just you and your goals.
+      </p>
+      <div class="hero-ctas">
+        <a class="btn-primary" href="https://play.google.com/store/apps/details?id=com.habitsetu.app"><span>🤖</span> Get it on Android</a>
+        <a class="btn-secondary" href="#features">Learn more →</a>
+      </div>
+      <div class="hero-trust">
+        <span class="trust-item">🔒 100% Offline</span>
+        <span class="trust-item">🆓 Free to Download</span>
+        <span class="trust-item">🌱 Lightweight</span>
+      </div>
+    </div>
+
+    <div class="hero-phones">
+      <div class="progress-badge">
+        <svg class="ring-svg" viewBox="0 0 44 44">
+          <defs>
+            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#22D3EE"/>
+              <stop offset="100%" stop-color="#2563EB"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-track" cx="22" cy="22" r="18"/>
+          <circle class="ring-progress" cx="22" cy="22" r="18"/>
+        </svg>
+        <div class="badge-text">
+          <div class="badge-pct">33%</div>
+          <div class="badge-label">Today's Progress</div>
+        </div>
+      </div>
+      <div class="streak-badge">
+        <span style="font-size:1.4rem">🔥</span>
+        <div class="streak-text">
+          <div class="streak-num">5 Day Streak</div>
+          <div class="streak-label">Keep it going!</div>
+        </div>
+      </div>
+      <div class="phone-frame phone-main">
+        <img src="./assets/home.jpg" alt="HabitSetu home screen">
+      </div>
+      <div class="phone-frame phone-back">
+        <img src="./assets/stats.jpg" alt="HabitSetu stats screen">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-num">∞</div>
+      <div class="stat-desc">Unlimited Habits</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-desc">Data Collected by Us</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">100%</div>
+      <div class="stat-desc">Offline & Private</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <div class="section-head">
+      <div class="section-eyebrow">Why HabitSetu</div>
+      <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
+      <p class="section-sub">Designed with a single purpose — to help you show up every day and build the life you want.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <div class="feature-title">Visual Streaks & Progress</div>
+        <p class="feature-desc">Watch your consistency grow day by day. Visual streak tracking and a monthly activity calendar show exactly how far you've come, keeping motivation high.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔔</div>
+        <div class="feature-title">Smart Reminders</div>
+        <p class="feature-desc">Set precise, custom reminders for each habit. Notifications arrive exactly when you need them and auto-restore after a device restart — so you never miss a check-in.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">Offline-First & Private</div>
+        <p class="feature-desc">Your data lives only on your device. No accounts, no cloud sync, no servers. HabitSetu is fully offline — your progress belongs to you and only you.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Lightweight by Design</div>
+        <p class="feature-desc">No bloat, no battery drain, no unnecessary background processes. HabitSetu automatically optimizes local storage for a fast, smooth experience on any device.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCREENSHOTS -->
+<section class="section screenshots-section" id="screenshots">
+  <div class="section-inner">
+    <div class="section-head" style="text-align:center; margin-bottom:50px;">
+      <div class="section-eyebrow">App Preview</div>
+      <h2 class="section-title">Clean. Simple. Effective.</h2>
+      <p class="section-sub" style="margin:0 auto;">Every screen is crafted to keep you focused on what matters — your habits.</p>
+    </div>
+    <div class="screens-layout">
+      <div class="screen-item screen-side">
+        <div class="screen-frame"><img src="./assets/add_habit.jpg" alt="Add Habit screen"></div>
+        <span class="screen-label">Add Habit</span>
+      </div>
+      <div class="screen-item screen-main">
+        <div class="screen-frame"><img src="./assets/home.jpg" alt="Home screen"></div>
+        <span class="screen-label">Daily Overview</span>
+      </div>
+      <div class="screen-item screen-side">
+        <div class="screen-frame"><img src="./assets/stats.jpg" alt="Stats screen"></div>
+        <span class="screen-label">Habit Stats</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACY -->
+<section class="section" id="privacy">
+  <div class="section-inner">
+    <div class="privacy-section">
+      <div>
+        <div class="section-eyebrow">Privacy First</div>
+        <h2 class="section-title">Your habits are<br><span class="headline-gradient">your business.</span></h2>
+        <p class="section-sub" style="margin-top:12px;">Your habit data lives entirely on your device — it never reaches our servers. For ad display, we use Google AdMob transparently, and you can control your ad preferences at any time.</p>
+      </div>
+      <div class="privacy-badges">
+        <div class="priv-badge">
+          <span class="priv-icon">📵</span>
+          <div>
+            <div class="priv-title">No Internet Required for Habits</div>
+            <p class="priv-desc">All your habit data is stored locally. Works fully offline — no Wi-Fi needed for tracking.</p>
+          </div>
+        </div>
+        <div class="priv-badge">
+          <span class="priv-icon">🚫</span>
+          <div>
+            <div class="priv-title">No Account, No Sign-up</div>
+            <p class="priv-desc">Open the app and start tracking. No email, no password, no waiting.</p>
+          </div>
+        </div>
+        <div class="priv-badge">
+          <span class="priv-icon">💾</span>
+          <div>
+            <div class="priv-title">Local Storage Only</div>
+            <p class="priv-desc">Habit data stored securely in a local Room database on your device. No servers, no cloud.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="download">
+  <div class="cta-inner">
+    <img class="cta-icon" src="./assets/playstore.png" alt="HabitSetu">
+    <h2 class="cta-title">Start small.<br>Stay consistent.<br><span class="headline-gradient">Transform your life.</span></h2>
+    <p class="cta-sub">Download HabitSetu free today and build the daily habits that bridge your goals to reality. 🌱</p>
+    <div class="cta-buttons">
+      <a class="btn-primary" href="https://play.google.com/store/apps/details?id=com.habitsetu.app" style="padding:14px 30px;font-size:1rem;"><span>🤖</span> Get it on Google Play</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <img src="./assets/playstore.png" alt="HabitSetu icon">
+    <span>HabitSetu</span>
+  </div>
+  <span class="footer-copy">© 2026 HabitSetu. All rights reserved.</span>
+  <div class="footer-links">
+    <a onclick="openPrivacy()">Privacy Policy</a>
+    <a href="mailto:habitsetu@gmail.com">Contact</a>
+  </div>
+</footer>
+
+<script>
+  function openPrivacy() {
+    document.getElementById('privacyModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closePrivacy() {
+    document.getElementById('privacyModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function scrollPolicy(id) {
+    event.preventDefault();
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePrivacy();
+  });
+</script>
 </body>
 </html>
